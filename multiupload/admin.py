@@ -161,10 +161,13 @@ class MultiUploadAdmin(admin.ModelAdmin):
                         error = "maxFileSize"
                     if f.size < self.upload_options["minfilesize"]:
                         error = "minFileSize"
-                        # allowed file type
-                    if f.content_type not in \
-                            self.upload_options["acceptedformats"]:
-                        error = "acceptFileTypes"
+
+                    # allowed file type
+                    acceptedformats = self.upload_options["acceptedformats"]
+                    # Allow any mimetype if we set the value to be ("*",)
+                    if not acceptedformats!=("*",):
+                        if f.content_type not in acceptedformats:
+                            error = "acceptFileTypes"
 
                     # the response data which will be returned to
                     # the uploader as json
