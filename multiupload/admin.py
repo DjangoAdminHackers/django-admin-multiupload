@@ -165,7 +165,7 @@ class MultiUploadAdmin(admin.ModelAdmin):
                     # allowed file type
                     acceptedformats = self.upload_options["acceptedformats"]
                     # Allow any mimetype if we set the value to be ("*",)
-                    if not acceptedformats!=("*",):
+                    if acceptedformats!=("*",):
                         if f.content_type not in acceptedformats:
                             error = "acceptFileTypes"
 
