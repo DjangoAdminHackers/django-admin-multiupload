@@ -5,7 +5,10 @@ from django.contrib import admin
 from django.shortcuts import render, get_object_or_404
 from django.conf.urls import patterns,url
 from django.core.urlresolvers import reverse
-from django.utils import simplejson as json
+try:
+    import json
+except ImportError:
+    from django.utils import simplejson as json
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 
@@ -224,7 +227,7 @@ class MultiUploadAdmin(admin.ModelAdmin):
                 response_type = "text/html"
 
                 # return the data to the uploading plugin
-                return HttpResponse(response_data, mimetype=response_type)
+                return HttpResponse(response_data, content_type=response_type)
 
             else:
                 # file has to be deleted
@@ -240,7 +243,7 @@ class MultiUploadAdmin(admin.ModelAdmin):
 
                 # return the result data
                 # here it always has to be json
-                return HttpResponse(response_data, mimetype="application/json")
+                return HttpResponse(response_data, content_type="application/json")
 
         else:
             #GET
