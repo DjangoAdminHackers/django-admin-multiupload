@@ -13,28 +13,8 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 
 
-class MultiUploadAdmin(admin.ModelAdmin):
-    class Media:
-        js = (
-            'jquery/jquery.1.8.0.min.js',
-            'jquery/jquery_fix_csrf.js',
-            'jquery/jquery.ui.widget.js',
-            'jquery/tmpl.min.js',
-            'jquery/canvas-to-blob.min.js',
-            'jquery/load-image.min.js',
-            'jquery/jquery.iframe-transport.js',
-            'jquery/jquery.fileupload.js',
-            'jquery/jquery.fileupload-fp.js',
-            'jquery/jquery.fileupload-ui.js',
-        )
-        css = {
-            'all': ['css/jquery-ui.css',
-                    'css/jquery.fileupload-ui.css',
-                    'css/multiupload.css',
-                    ],
-        }
-    change_form_template = 'multiupload/change_form.html'
-    change_list_template = 'multiupload/change_list.html'
+class MultiUploadMixin(object):
+
     multiupload_template = 'multiupload/upload.html'
     multiupload_list = True
     multiupload_form = True
@@ -53,37 +33,6 @@ class MultiUploadAdmin(admin.ModelAdmin):
             "minfilesize": self.multiupload_minfilesize,
             "acceptedformats": self.multiupload_acceptedformats,
         }
-
-    def render_change_form(self, request, context, *args, **kwargs):
-        context.update({
-            'multiupload_form': self.multiupload_form,
-        })
-        if self.multiupload_form:
-            if 'object_id' in context:
-                object_id = context['object_id']
-                context.update({
-                    'multiupload_form_url': reverse(
-                        'admin:%s' % self.get_multiupload_form_view_name(),
-                        args=[object_id, ]),
-                })
-        return super(MultiUploadAdmin, self).render_change_form(
-            request, context, *args, **kwargs)
-
-    def changelist_view(self, request, extra_context=None):
-        pop = request.REQUEST.get('pop')
-        extra_context = extra_context or {}
-        extra_context.update({
-            'multiupload_list': self.multiupload_list,
-        })
-        if self.multiupload_list:
-            url = reverse('admin:%s' % self.get_multiupload_list_view_name())
-            if pop:
-                url += '?pop=1'
-            extra_context.update({
-                'multiupload_list_url': url,
-            })
-        return super(MultiUploadAdmin, self).changelist_view(
-            request, extra_context)
 
     def get_multiupload_list_view_name(self):
         module_name = self.model._meta.module_name
@@ -107,7 +56,7 @@ class MultiUploadAdmin(admin.ModelAdmin):
                     self.admin_site.admin_view(self.admin_upload_view),
                     name=self.get_multiupload_form_view_name()),
             )
-        return multi_urls + super(MultiUploadAdmin, self).get_urls(*args,
+        return multi_urls + super(MultiUploadMixin, self).get_urls(*args,
                                                                    **kwargs)
 
     def process_uploaded_file(self, uploaded, object, request):
@@ -274,3 +223,61 @@ class MultiUploadAdmin(admin.ModelAdmin):
                           self.multiupload_template,
                           context,
                           )
+
+
+class MultiUploadAdmin(MultiUploadMixin, admin.ModelAdmin):
+
+    change_form_template = 'multiupload/change_form.html'
+    change_list_template = 'multiupload/change_list.html'
+
+    class Media:
+        js = (
+            'jquery/jquery.1.8.0.min.js',
+            'jquery/jquery_fix_csrf.js',
+            'jquery/jquery.ui.widget.js',
+            'jquery/tmpl.min.js',
+            'jquery/canvas-to-blob.min.js',
+            'jquery/load-image.min.js',
+            'jquery/jquery.iframe-transport.js',
+            'jquery/jquery.fileupload.js',
+            'jquery/jquery.fileupload-fp.js',
+            'jquery/jquery.fileupload-ui.js',
+        )
+        css = {
+            'all': ['css/jquery-ui.css',
+                    'css/jquery.fileupload-ui.css',
+                    'css/multiupload.css',
+                    ],
+        }
+
+    def render_change_form(self, request, context, *args, **kwargs):
+        context.update({
+            'multiupload_form': self.multiupload_form,
+        })
+        if self.multiupload_form:
+            if 'object_id' in context:
+                object_id = context['object_id']
+                context.update({
+                    'multiupload_form_url': reverse(
+                        'admin:%s' % self.get_multiupload_form_view_name(),
+                        args=[object_id, ]),
+                })
+        return super(MultiUploadAdmin, self).render_change_form(
+            request, context, *args, **kwargs)
+
+    def changelist_view(self, request, extra_context=None):
+        pop = request.REQUEST.get('pop')
+        extra_context = extra_context or {}
+        extra_context.update({
+            'multiupload_list': self.multiupload_list,
+        })
+        if self.multiupload_list:
+            url = reverse('admin:%s' % self.get_multiupload_list_view_name())
+            if pop:
+                url += '?pop=1'
+            extra_context.update({
+                'multiupload_list_url': url,
+            })
+        return super(MultiUploadAdmin, self).changelist_view(
+            request, extra_context)
+
