@@ -35,12 +35,12 @@ class MultiUploadMixin(object):
         }
 
     def get_multiupload_list_view_name(self):
-        module_name = self.model._meta.module_name
-        return '%s_multiupload_list' % module_name
+        model_name = self.model._meta.model_name
+        return '%s_multiupload_list' % model_name
 
     def get_multiupload_form_view_name(self):
-        module_name = self.model._meta.module_name
-        return '%s_multiupload_form' % module_name
+        model_name = self.model._meta.model_name
+        return '%s_multiupload_form' % model_name
 
     def get_urls(self, *args, **kwargs):
         multi_urls = patterns('')
